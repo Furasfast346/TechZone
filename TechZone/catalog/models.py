@@ -9,6 +9,8 @@ class Products(models.Model):
     quantity = models.IntegerField()
     image = models.CharField(max_length=500, blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00,  verbose_name='Скидка (%)')
 
     class Meta:
         managed = False
