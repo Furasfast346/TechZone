@@ -55,15 +55,13 @@
 
                     <div class="h-40 flex items-center justify-center">
                         {% if product.image %}
-                        <img src="{{ product.image }}" alt="{{ product.image }}"
-                            class="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform">
+                        <img src="{% static 'catalog/images/' %}{{product.image}}" alt="{{product.image}}" class="max-h-full max-w-full object-contain">
                         {% else %}
-                        <i class="fas fa-box text-6xl text-purple-300 group-hover:scale-110 transition-transform"></i>
+                        <i class="fas fa-box text-6xl text-purple-300"></i>
                         {% endif %}
                     </div>
                 </div>
             </a>
-
             <div class="p-4">
                 <!-- Бренд -->
                 {% if product.brand %}
