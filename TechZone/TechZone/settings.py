@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'catalog',
     'main_page',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -75,8 +76,12 @@ WSGI_APPLICATION = 'TechZone.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'TechZone',
+        'USER': 'postgres',
+        'PASSWORD': '0000',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
@@ -125,3 +130,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
