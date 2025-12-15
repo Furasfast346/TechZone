@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Products
+from databases.models import Products
 
 def catalog(request):
     products = Products.objects.all()
