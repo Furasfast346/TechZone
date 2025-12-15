@@ -1,0 +1,27 @@
+/**
+ * TechZone - Home Page Styles
+ */
+
+/* Banner Slider */
+.banner-slide {
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Slider Dots */
+.slider-dot {
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.slider-dot:hover {
+    transform: scale(1.2);
+}
+
+.slider-dot.active {
+    background: white;
+}
+
+/* Timer */
+#timerDisplay {
+    font-variant-numeric: tabular-nums;
+}

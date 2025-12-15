@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оформление заказа - TechZone{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <a href="{% url 'home' %}" class="hover:text-purple-600 transition">Главная</a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 font-medium">Оформление заказа</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-8">Оформление заказа</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Order Form -->
+        <div class="lg:col-span-2">
+            <form id="checkoutForm" method="POST" action="{% url 'checkout' %}">
+                {% csrf_token %}
+
+                <!-- Contact Info -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm">1</span>
+                        Контактные данные
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Имя *</label>
+                            <input type="text" name="first_name" required
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                                placeholder="Иван"
+                                value="{{ user.first_name|default:'' }}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Фамилия *</label>
+                            <input type="text" name="last_name" required
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                                placeholder="Иванов"
+                                value="{{ user.last_name|default:'' }}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Телефон *</label>
+                            <input type="tel" name="phone" required
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                                placeholder="+7 (999) 123-45-67">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                            <input type="email" name="email" required
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                                placeholder="email@example.com"
+                                value="{{ user.email|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm">2</span>
+                        Доставка
+                    </h2>
+
+                    <div class="space-y-3 mb-4">
+                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-500 transition delivery-option">
+                            <input type="radio" name="delivery" value="courier" class="hidden" checked>
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center radio-circle">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full hidden radio-dot"></div>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-medium">Курьером</span>
+                                <p class="text-sm text-gray-500">1-2 дня</p>
+                            </div>
+                            <span class="font-semibold">300 ₽</span>
+                        </label>
+
+                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-500 transition delivery-option">
+                            <input type="radio" name="delivery" value="pickup" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center radio-circle">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full hidden radio-dot"></div>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-medium">Самовывоз</span>
+                                <p class="text-sm text-gray-500">Сегодня</p>
+                            </div>
+                            <span class="font-semibold text-green-600">Бесплатно</span>
+                        </label>
+                    </div>
+
+                    <div id="addressBlock">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Адрес доставки *</label>
+                        <textarea name="address" rows="2" id="addressInput"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition resize-none"
+                            placeholder="Город, улица, дом, квартира"></textarea>
+                    </div>
+                </div>
+
+                <!-- Payment -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm">3</span>
+                        Оплата
+                    </h2>
+
+                    <div class="space-y-3">
+                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-500 transition payment-option">
+                            <input type="radio" name="payment" value="card" class="hidden" checked>
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center radio-circle">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full hidden radio-dot"></div>
+                            </div>
+                            <i class="fas fa-credit-card text-purple-600 mr-3"></i>
+                            <span class="font-medium">Картой онлайн</span>
+                        </label>
+
+                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-500 transition payment-option">
+                            <input type="radio" name="payment" value="cash" class="hidden">
+                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center radio-circle">
+                                <div class="w-3 h-3 bg-purple-600 rounded-full hidden radio-dot"></div>
+                            </div>
+                            <i class="fas fa-money-bill-wave text-green-600 mr-3"></i>
+                            <span class="font-medium">Наличными при получении</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Comment -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h2 class="text-xl font-bold mb-4">Комментарий к заказу</h2>
+                    <textarea name="comment" rows="3"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition resize-none"
+                        placeholder="Дополнительная информация..."></textarea>
+                </div>
+
+                <!-- Hidden cart data -->
+                <input type="hidden" name="cart_data" id="cartDataInput">
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-28">
+                <h2 class="text-xl font-bold mb-4">Ваш заказ</h2>
+
+                <!-- Cart Items -->
+                <div id="checkoutItems" class="space-y-4 mb-6 max-h-64 overflow-y-auto">
+                    <!-- Items will be inserted by JS -->
+                </div>
+
+                <div id="emptyCheckoutCart" class="text-center py-8 text-gray-400 hidden">
+                    <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                    <p>Корзина пуста</p>
+                </div>
+
+                <!-- Totals -->
+                <div class="border-t pt-4 space-y-2">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Товары (<span id="itemsCount">0</span>)</span>
+                        <span id="subtotal">0 ₽</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Доставка</span>
+                        <span id="deliveryPrice">300 ₽</span>
+                    </div>
+                    <div class="flex justify-between text-xl font-bold pt-2 border-t">
+                        <span>Итого</span>
+                        <span id="totalPrice" class="text-purple-600">0 ₽</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" form="checkoutForm" id="submitOrder"
+                    class="w-full bg-purple-600 text-white py-4 rounded-xl hover:bg-purple-700 transition font-semibold text-lg mt-6 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Оформить заказ
+                </button>
+
+                <p class="text-xs text-gray-400 text-center mt-4">
+                    Нажимая кнопку, вы соглашаетесь с условиями обработки персональных данных
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/checkout.js' %}"></script>
+{% endblock %}

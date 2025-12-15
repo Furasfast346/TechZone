@@ -1,0 +1,37 @@
+/**
+ * TechZone - Product Detail Page Styles
+ */
+
+/* Quantity input */
+#quantity {
+    -moz-appearance: textfield;
+}
+
+#quantity::-webkit-outer-spin-button,
+#quantity::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Image zoom on hover */
+#mainImage {
+    transition: transform 0.3s ease;
+}
+
+#mainImage:hover {
+    transform: scale(1.05);
+}
+
+/* Description prose styles */
+.prose p {
+    margin-bottom: 1rem;
+}
+
+.prose ul, .prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.prose li {
+    margin-bottom: 0.5rem;
+}

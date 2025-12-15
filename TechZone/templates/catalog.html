@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if category %}{{ category }}{% else %}Каталог{% endif %} - TechZone{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs -->
+<div class="container mx-auto px-4 py-4">
+    <nav class="flex items-center gap-2 text-sm text-gray-500">
+        <a href="{% url 'home' %}" class="hover:text-purple-600 transition">Главная</a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        {% if category %}
+        <a href="{% url 'catalog' %}" class="hover:text-purple-600 transition">Каталог</a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 font-medium">{{ category }}</span>
+        {% else %}
+        <span class="text-gray-900 font-medium">Каталог</span>
+        {% endif %}
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 pb-12">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                {% if filter == 'sale' %}🔥 Акции и скидки
+                {% elif filter == 'new' %}✨ Новинки
+                {% elif filter == 'popular' %}🏆 Популярные товары
+                {% elif category %}{{ category }}
+                {% else %}Каталог товаров
+                {% endif %}
+            </h1>
+            <p class="text-gray-500">
+                {% if products.paginator %}
+                Найдено: {{ products.paginator.count }} товаров
+                {% else %}
+                Найдено: {{ products|length }} товаров
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Sort -->
+        <div class="flex items-center gap-4">
+            <label class="text-gray-600 text-sm hidden sm:block">Сортировка:</label>
+            <select id="sortSelect" class="px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition bg-white">
+                <option value="default" {% if sort == 'default' or not sort %}selected{% endif %}>По умолчанию</option>
+                <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Сначала дешевле</option>
+                <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Сначала дороже</option>
+                <option value="name" {% if sort == 'name' %}selected{% endif %}>По названию</option>
+                <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Active Filters -->
+    {% if category or filter or request.GET.q %}
+    <div class="flex flex-wrap gap-2 mb-6">
+        {% if category %}
+        <a href="{% url 'catalog' %}{% if filter %}?filter={{ filter }}{% endif %}"
+           class="flex items-center gap-2 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm hover:bg-purple-200 transition">
+            {{ category }}
+            <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+        {% if filter %}
+        <a href="{% url 'catalog' %}{% if category %}?category={{ category }}{% endif %}"
+           class="flex items-center gap-2 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm hover:bg-purple-200 transition">
+            {% if filter == 'sale' %}Со скидкой{% elif filter == 'new' %}Новинки{% elif filter == 'popular' %}Популярные{% endif %}
+            <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+        {% if request.GET.q %}
+        <a href="{% url 'catalog' %}"
+           class="flex items-center gap-2 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm hover:bg-purple-200 transition">
+            Поиск: "{{ request.GET.q }}"
+            <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+        <a href="{% url 'catalog' %}" class="text-gray-500 text-sm hover:text-purple-600 transition ml-2">
+            Сбросить всё
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for product in products %}
+        {% include 'partials/product_card.html' with product=product show_discount=True %}
+        {% empty %}
+        <div class="col-span-full text-center py-16">
+            <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">Товары не найдены</h3>
+            <p class="text-gray-500 mb-6">Попробуйте изменить параметры поиска</p>
+            <a href="{% url 'catalog' %}" class="inline-block bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition">
+                Показать все товары
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if products.paginator and products.paginator.num_pages > 1 %}
+    <div class="flex items-center justify-center gap-2 mt-12">
+        {% if products.has_previous %}
+        <a href="?page={{ products.previous_page_number }}{% if category %}&category={{ category }}{% endif %}{% if filter %}&filter={{ filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}"
+            class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-purple-500 hover:text-purple-600 transition">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% endif %}
+
+        {% for num in products.paginator.page_range %}
+            {% if products.number == num %}
+            <span class="w-10 h-10 flex items-center justify-center rounded-lg bg-purple-600 text-white font-medium">
+                {{ num }}
+            </span>
+            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+            <a href="?page={{ num }}{% if category %}&category={{ category }}{% endif %}{% if filter %}&filter={{ filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}"
+                class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-purple-500 hover:text-purple-600 transition font-medium">
+                {{ num }}
+            </a>
+            {% endif %}
+        {% endfor %}
+
+        {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}{% if category %}&category={{ category }}{% endif %}{% if filter %}&filter={{ filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}"
+            class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-purple-500 hover:text-purple-600 transition">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/catalog.js' %}"></script>
+{% endblock %}

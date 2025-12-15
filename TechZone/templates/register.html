@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Регистрация - TechZone{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-md mx-auto">
+        <div class="bg-white rounded-2xl shadow-sm p-8">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-plus text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold">Регистрация</h1>
+                <p class="text-gray-500 mt-2">Создайте аккаунт для покупок</p>
+            </div>
+
+            <form method="POST" action="{% url 'register' %}" class="space-y-4">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="bg-red-100 text-red-700 px-4 py-3 rounded-xl text-sm">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            {{ error }}<br>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        {{ error }}<br>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+                        <input type="text" name="first_name"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                            placeholder="Иван">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
+                        <input type="text" name="last_name"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                            placeholder="Иванов">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Логин *</label>
+                    <input type="text" name="username" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                        placeholder="Придумайте логин">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" name="email" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                        placeholder="email@example.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Пароль *</label>
+                    <input type="password" name="password1" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                        placeholder="Минимум 8 символов">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Подтверждение пароля *</label>
+                    <input type="password" name="password2" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                        placeholder="Повторите пароль">
+                </div>
+
+                <label class="flex items-start gap-2">
+                    <input type="checkbox" name="agree" required class="custom-checkbox mt-1">
+                    <span class="text-sm text-gray-600">
+                        Я согласен с <a href="#" class="text-purple-600 hover:underline">условиями использования</a>
+                        и <a href="#" class="text-purple-600 hover:underline">политикой конфиденциальности</a>
+                    </span>
+                </label>
+
+                <button type="submit"
+                    class="w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 transition font-semibold">
+                    Зарегистрироваться
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-500">
+                    Уже есть аккаунт?
+                    <a href="{% url 'login' %}" class="text-purple-600 hover:text-purple-700 font-medium">Войти</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

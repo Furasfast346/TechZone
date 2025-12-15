@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет - TechZone{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <a href="{% url 'home' %}" class="hover:text-purple-600 transition">Главная</a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 font-medium">Личный кабинет</span>
+    </nav>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar -->
+        <div class="lg:w-64 flex-shrink-0">
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                <!-- User Info -->
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-user text-white text-3xl"></i>
+                    </div>
+                    <h2 class="font-bold text-lg">{{ user.first_name|default:user.username }} {{ user.last_name }}</h2>
+                    <p class="text-gray-500 text-sm">{{ user.email }}</p>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="space-y-2">
+                    <a href="#profile" class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 text-purple-600 font-medium">
+                        <i class="fas fa-user w-5"></i>
+                        <span>Профиль</span>
+                    </a>
+                    <a href="#orders" class="flex items-center gap-3 p-3 rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                        <i class="fas fa-shopping-bag w-5"></i>
+                        <span>Мои заказы</span>
+                    </a>
+                    <a href="{% url 'logout' %}" class="flex items-center gap-3 p-3 rounded-xl text-red-600 hover:bg-red-50 transition">
+                        <i class="fas fa-sign-out-alt w-5"></i>
+                        <span>Выйти</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Profile Settings -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                <h2 class="text-xl font-bold mb-6">Личные данные</h2>
+
+                <form method="POST" action="{% url 'profile' %}" class="space-y-4">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+                            <input type="text" name="first_name" value="{{ user.first_name }}"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
+                            <input type="text" name="last_name" value="{{ user.last_name }}"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" name="email" value="{{ user.email }}"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                        <input type="tel" name="phone" value="{{ profile.phone|default:'' }}"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition"
+                            placeholder="+7 (999) 123-45-67">
+                    </div>
+
+                    <button type="submit"
+                        class="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition font-semibold">
+                        Сохранить изменения
+                    </button>
+                </form>
+            </div>
+
+            <!-- Orders -->
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                <h2 class="text-xl font-bold mb-6">Мои заказы</h2>
+
+                {% if orders %}
+                <div class="space-y-4">
+                    {% for order in orders %}
+                    <div class="border border-gray-200 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <span class="font-semibold">Заказ #{{ order.id }}</span>
+                                <span class="text-gray-500 text-sm ml-2">{{ order.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm font-medium
+                                {% if order.status == 'completed' %}bg-green-100 text-green-600
+                                {% elif order.status == 'processing' %}bg-yellow-100 text-yellow-600
+                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-600
+                                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {{ order.get_status_display|default:order.status }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500">{{ order.items_count }} товаров</span>
+                            <span class="font-bold text-purple-600">{{ order.total|floatformat:0 }} ₽</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-shopping-bag text-4xl mb-2"></i>
+                    <p>У вас пока нет заказов</p>
+                    <a href="{% url 'catalog' %}" class="inline-block mt-4 text-purple-600 hover:text-purple-700 font-medium">
+                        Перейти в каталог →
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

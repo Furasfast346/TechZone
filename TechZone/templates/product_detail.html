@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - TechZone{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/product.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs -->
+<div class="container mx-auto px-4 py-4">
+    <nav class="flex items-center gap-2 text-sm text-gray-500 overflow-x-auto whitespace-nowrap">
+        <a href="{% url 'home' %}" class="hover:text-purple-600 transition">Главная</a>
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'catalog' %}" class="hover:text-purple-600 transition">Каталог</a>
+        {% if product.category %}
+        <i class="fas fa-chevron-right text-xs"></i>
+        <a href="{% url 'catalog' %}?category={{ product.category }}" class="hover:text-purple-600 transition">{{ product.category }}</a>
+        {% endif %}
+        <i class="fas fa-chevron-right text-xs"></i>
+        <span class="text-gray-900 font-medium truncate">{{ product.name }}</span>
+    </nav>
+</div>
+
+<!-- Product Section -->
+<section class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            <!-- Product Image -->
+            <div class="space-y-4">
+                <div class="relative bg-gray-50 rounded-2xl p-8 aspect-square flex items-center justify-center overflow-hidden">
+                    <!-- Badges -->
+                    {% if product.discount %}
+                    <span class="absolute top-4 left-4 bg-red-500 text-white text-sm px-3 py-1 rounded-full font-semibold">
+                        -{{ product.discount }}%
+                    </span>
+                    {% endif %}
+
+                    {% if product.quantity <= 0 %}
+                    <span class="absolute top-4 right-4 bg-gray-500 text-white text-sm px-3 py-1 rounded-full font-semibold">
+                        Нет в наличии
+                    </span>
+                    {% else %}
+                    <span class="absolute top-4 right-4 bg-green-500 text-white text-sm px-3 py-1 rounded-full font-semibold">
+                        В наличии
+                    </span>
+                    {% endif %}
+
+                    <!-- Image -->
+                    {% if product.image %}
+                    <img src="{{ product.image }}" alt="{{ product.name }}" class="max-w-full max-h-full object-contain" id="mainImage">
+                    {% else %}
+                    <i class="fas fa-box text-[150px] text-purple-300"></i>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="space-y-6">
+                <!-- Brand & Status -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    {% if product.brand %}
+                    <span class="text-sm text-gray-500">{{ product.brand }}</span>
+                    <span class="text-gray-300">|</span>
+                    {% endif %}
+                    {% if product.quantity > 0 %}
+                    <span class="text-sm text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>В наличии ({{ product.quantity }} шт.)</span>
+                    {% else %}
+                    <span class="text-sm text-gray-500 font-medium"><i class="fas fa-times-circle mr-1"></i>Нет в наличии</span>
+                    {% endif %}
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ product.name }}</h1>
+
+                <!-- Category -->
+                {% if product.category %}
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500">Категория:</span>
+                    <a href="{% url 'catalog' %}?category={{ product.category }}" class="text-purple-600 hover:text-purple-700 font-medium">
+                        {{ product.category }}
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Price -->
+                <div class="bg-gray-50 rounded-2xl p-5">
+                    <div class="flex items-end gap-3 mb-2 flex-wrap">
+                        {% if product.discount %}
+                            {% widthratio product.price 100 product.discount as discount_amount %}
+                            <span class="text-3xl md:text-4xl font-bold text-purple-600">{{ product.price|floatformat:0 }} ₽</span>
+                            <span class="text-xl text-gray-400 line-through">
+                                {% widthratio product.price 100 100|add:product.discount as old_price %}
+                                {{ old_price|floatformat:0 }} ₽
+                            </span>
+                            <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-lg font-semibold">-{{ product.discount }}%</span>
+                        {% else %}
+                            <span class="text-3xl md:text-4xl font-bold text-purple-600">{{ product.price|floatformat:0 }} ₽</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quantity & Add to Cart -->
+                {% if product.quantity > 0 %}
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex items-center border-2 border-gray-200 rounded-xl">
+                        <button id="decreaseQty" class="w-12 h-12 flex items-center justify-center text-gray-500 hover:text-purple-600 transition">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="quantity" value="1" min="1" max="{{ product.quantity }}"
+                            class="w-16 text-center font-semibold text-lg border-0 focus:outline-none focus:ring-0">
+                        <button id="increaseQty" class="w-12 h-12 flex items-center justify-center text-gray-500 hover:text-purple-600 transition">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <button id="addToCartBtn"
+                        data-id="{{ product.id }}"
+                        data-name="{{ product.name }}"
+                        data-price="{{ product.price }}"
+                        data-image="{{ product.image|default:'' }}"
+                        class="flex-1 bg-purple-600 text-white py-3 px-8 rounded-xl hover:bg-purple-700 transition font-semibold text-lg flex items-center justify-center gap-2">
+                        <i class="fas fa-shopping-cart"></i>
+                        Добавить в корзину
+                    </button>
+                </div>
+                {% else %}
+                <div class="bg-gray-100 text-gray-500 py-4 px-8 rounded-xl text-center font-semibold text-lg">
+                    <i class="fas fa-times-circle mr-2"></i>
+                    Товар временно отсутствует
+                </div>
+                {% endif %}
+
+                <!-- Quick Info -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-truck text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm">Доставка</h4>
+                            <p class="text-gray-500 text-sm">От 1-2 дней</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm">Гарантия</h4>
+                            <p class="text-gray-500 text-sm">12 месяцев</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-credit-card text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm">Оплата</h4>
+                            <p class="text-gray-500 text-sm">Картой / Наличные</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-undo text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-sm">Возврат</h4>
+                            <p class="text-gray-500 text-sm">14 дней</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Description -->
+{% if product.description %}
+<section class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+        <h2 class="text-2xl font-bold mb-4">Описание</h2>
+        <div class="prose max-w-none text-gray-600">
+            {{ product.description|linebreaks }}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Related Products -->
+{% if related_products %}
+<section class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl md:text-3xl font-bold mb-6">Похожие товары</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for related in related_products %}
+        {% include 'partials/product_card.html' with product=related show_discount=True %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/product.js' %}"></script>
+{% endblock %}

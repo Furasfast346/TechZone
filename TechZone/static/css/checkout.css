@@ -1,0 +1,25 @@
+/**
+ * TechZone - Checkout Page Styles
+ */
+
+/* Radio button custom styling */
+.delivery-option input:checked ~ .radio-circle,
+.payment-option input:checked ~ .radio-circle {
+    border-color: #9333ea;
+}
+
+.delivery-option input:checked ~ .radio-circle .radio-dot,
+.payment-option input:checked ~ .radio-circle .radio-dot {
+    display: block;
+}
+
+.delivery-option:has(input:checked),
+.payment-option:has(input:checked) {
+    border-color: #9333ea;
+    background-color: #faf5ff;
+}
+
+/* Phone input */
+input[type="tel"] {
+    font-variant-numeric: tabular-nums;
+}
